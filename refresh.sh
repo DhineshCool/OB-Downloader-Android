@@ -7,10 +7,10 @@ fi
 rm main.py
 rm updater.py
 rm history.py
-rm -rf Youtube-Downloader-Android
+rm -rf OB-Downloader-Android
 rm -rf bin
-git clone https://github.com/DhineshCool/Youtube-Downloader-Android/ -b master --single-branch
-cd Youtube-Downloader-Android
+git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch
+cd OB-Downloader-Android
 sh install.sh
 
 #Cache Removal
