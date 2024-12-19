@@ -6,27 +6,26 @@ import logging
 from termcolor import colored
 
 # Constants
-JSON_PATH = os.getenv('JSON_PATH', "/data/data/com.termux/files/home/default.json")
-TEMP_LOC = os.getenv('TEMP_LOC', "/data/data/com.termux/files/home/temp.txt")
-GEN_PATH = os.getenv('GEN_PATH', "/storage/emulated/0/")
-HISTORY_PATH = os.getenv('HISTORY_PATH', "/data/data/com.termux/files/home/history.txt")
+JSON_PATH = os.getenv('JSON_PATH', os.path.expanduser("~/default.json"))
+TEMP_LOC = os.getenv('TEMP_LOC', os.path.expanduser("~/temp.txt"))
+GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/"))
+HISTORY_PATH = os.getenv('HISTORY_PATH', os.path.expanduser("~/history.txt"))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Version Info
 def print_version_info():
-    version = linecache.getline(sys.argv[0], 1).replace("#", "")
-    engine = linecache.getline(sys.argv[0], 2).replace("#", "")
-    build = linecache.getline(sys.argv[0], 3).replace("#", "")
-
-    logging.info(version)
-    logging.info(engine)
+    """Print version information from the script's first three lines"""
+    version = linecache.getline(sys.argv[0], 1).replace("#", "").strip()
+    engine = linecache.getline(sys.argv[0], 2).replace("#", "").strip()
+    build = linecache.getline(sys.argv[0], 3).replace("#", "").strip()
+    logging.info(f"Version: {version}")
+    logging.info(f"Engine: {engine}")
     logging.info(f"Build: {build}")
     linecache.clearcache()
 
-# Load or Create JSON Config
 def load_or_create_json_config():
+    """Load or create the JSON configuration file"""
     if not os.path.isfile(JSON_PATH):
         json_data = {
             "default": [{"code": "", "codec": "", "last_upgrade": "", "history_backup": ""}],
@@ -43,8 +42,8 @@ def load_or_create_json_config():
             json.dump(json_data, file, indent=4)
         logging.info("JSON config created.")
 
-# Ensure Dependencies are Installed
 def ensure_dependencies():
+    """Ensure required dependencies are installed"""
     try:
         import ffmpeg
     except ModuleNotFoundError:
@@ -56,8 +55,8 @@ def ensure_dependencies():
         os.system('pip install --no-deps -U yt_dlp')
         logging.info("Installed yt_dlp.")
 
-# Sync with Google Drive
 def sync_with_drive():
+    """Sync history with Google Drive using rclone"""
     loc_path = os.path.dirname(sys.argv[0])
     history_file = os.path.join(loc_path, "history.txt")
     config = os.path.join(loc_path, "rclone.conf")
@@ -67,7 +66,8 @@ def sync_with_drive():
         os.system(f"{rc_temp} config")
         logging.info("Configured rclone.")
 
-    remote = open(config, 'r').readline().replace('[', '').replace(']', '').replace('\n', '') + ":"
+    with open(config, 'r') as config_file:
+        remote = config_file.readline().strip().replace('[', '').replace(']', '') + ":"
 
     if not os.path.isfile(history_file):
         os.system(f"{rc_temp} copy {remote}/history.txt {loc_path}")
@@ -76,8 +76,8 @@ def sync_with_drive():
     logging.info("Syncing with cloud...")
     os.system(f"{rc_temp} --verbose copy --update {history_file} {remote}")
 
-# Update History
 def update_history(title, site):
+    """Update download history"""
     title = title.replace('"', "`").replace("'", "`")
     history_entry = {
         "SNo": str(len(open(HISTORY_PATH, 'r').readlines()) + 1),
@@ -97,8 +97,8 @@ def update_history(title, site):
     logging.info("History updated and temp file removed.")
     sys.exit()
 
-# Download Content
 def download_content(opt, site):
+    """Download content using yt_dlp"""
     import yt_dlp
     try:
         with yt_dlp.YoutubeDL(opt) as yt:
@@ -108,8 +108,8 @@ def download_content(opt, site):
     except Exception as e:
         logging.error(f"Error downloading content: {e}")
 
-# Download Video
 def download_video(mode):
+    """Download video based on the mode"""
     if "playlist" in link:
         path = os.path.join(GEN_PATH, 'Termux_Downloader/Youtube/%(playlist)s/%(title)s.%(ext)s')
         thumb = True
@@ -158,8 +158,8 @@ def download_video(mode):
     }
     download_content(opt, site=mode)
 
-# Get or Update Resolution Code
 def get_or_update_resolution_code(data):
+    """Get or update the resolution code in the JSON configuration"""
     if data["default"][0]["code"] == "":
         print('Enter the respective code for Required Resolution:')
         print('[code] - [Resolution]')
@@ -201,8 +201,8 @@ def get_or_update_resolution_code(data):
 
     return code
 
-# Download Audio
 def download_audio(dir_name):
+    """Download audio based on the directory name"""
     logging.info(f"Downloading songs from {dir_name}.")
     with open(JSON_PATH, "r") as file:
         data = json.load(file)
@@ -224,8 +224,7 @@ def download_audio(dir_name):
                 json.dump(data, file)
 
     path = os.path.join(GEN_PATH, f"Termux_Downloader/{dir_name}/")
-    if not os.path.isdir(path):
-        os.mkdir(path)
+    os.makedirs(path, exist_ok=True)
 
     if "playlist" in link:
         op_path = os.path.join(path, '%(playlist)s/%(title)s.%(ext)s')
@@ -247,8 +246,8 @@ def download_audio(dir_name):
     site = "Youtube Music" if dir_name == "YTmusic" else "Youtube"
     download_content(opt, site=site)
 
-# Download from Other Sites
 def download_from_others():
+    """Download content from other websites"""
     if "www" in link:
         dir_name = link.split("www.")[1].split(".")[0].capitalize()
     else:
@@ -256,9 +255,7 @@ def download_from_others():
 
     logging.info(f"Downloading from {colored(dir_name, 'magenta')}.")
     path = os.path.join(GEN_PATH, f'Termux_Downloader/{dir_name}/')
-
-    if not os.path.isdir(path):
-        os.mkdir(path)
+    os.makedirs(path, exist_ok=True)
 
     opt = {
         'outtmpl': os.path.join(path, "%(title).50s.%(ext)s"),
@@ -271,31 +268,26 @@ def download_from_others():
         os.rmdir(path)
         logging.error(f"Error downloading from {dir_name}: {e}")
 
-# Download from FTP or Torrent
 def download_from_ftp_or_torrent():
+    """Download content from FTP or torrent links"""
     if "magnet" in link:
         logging.info("Downloading Torrent file from Magnet link.")
         path = os.path.join(GEN_PATH, "Termux_Downloader/Torrents/")
     else:
         logging.info("Downloading from FTP link.")
         path = os.path.join(GEN_PATH, "Termux_Downloader/Downloads/")
-
-    if not os.path.isdir(path):
-        os.mkdir(path)
-
+    os.makedirs(path, exist_ok=True)
     os.system(f"aria2c -d '{path}' '{link}' --file-allocation=none")
 
-# Download from Google Drive
 def download_from_drive():
+    """Download content from Google Drive"""
     file_id = link.replace("https://drive.google.com/file/d/", "").split("/")[0]
     path = os.path.join(GEN_PATH, "Termux_Downloader/Gdrive/")
-    if not os.path.isdir(path):
-        os.mkdir(path)
-
+    os.makedirs(path, exist_ok=True)
     os.system(f"gdown -O '{path}' --id '{file_id}'")
 
-# Link Distributor
 def link_distributor():
+    """Distribute links to appropriate download functions"""
     if "drive" in link:
         download_from_drive()
     elif "magnet" in link:
@@ -304,8 +296,7 @@ def link_distributor():
         download_audio(dir_name="YTmusic")
     elif "youtube" in link or "youtu.be" in link:
         path = os.path.join(GEN_PATH, 'Termux_Downloader/Youtube/')
-        if not os.path.isdir(path):
-            os.mkdir(path)
+        os.makedirs(path, exist_ok=True)
 
         print('Enter \n*(v) for Video \n*(a) for audio \n*(m) for advanced \n*(b) for best')
         T = input('v or a or m or b: ').strip().lower()
@@ -326,13 +317,13 @@ def link_distributor():
         except Exception:
             download_from_ftp_or_torrent()
 
-# Master Directory and Initialization
 def master_directory():
+    """Create master directory and initiate link distribution"""
     path = os.path.join(GEN_PATH, "Termux_Downloader/")
-    if not os.path.isdir(path):
-        os.mkdir(path)
+    os.makedirs(path, exist_ok=True)
 
     def clean_empty_directories():
+        """Remove empty directories"""
         empty_dirs = [root for root, dirs, files in os.walk(path) if not dirs and not files]
         for empty_dir in empty_dirs:
             os.rmdir(empty_dir)
