@@ -9,11 +9,12 @@ from termcolor import colored
 # Constants
 JSON_PATH = os.getenv('JSON_PATH', os.path.expanduser("~/default.json"))
 TEMP_LOC = os.getenv('TEMP_LOC', os.path.expanduser("~/temp.txt"))
-GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/Termux_Downloader/"))
+GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/OB_Downloader/"))
 HISTORY_PATH = os.path.join(GEN_PATH, "history.txt")
 
-# Check if running in Termux and set GEN1_PATH and HISTORY1_PATH
-if os.path.exists('/data/data/com.termux/files/'):
+# Check if running in Termux and set GEN1_PATH, FINAL_PATH, and HISTORY1_PATH
+TERMUX = os.path.exists('/data/data/com.termux/files/')
+if TERMUX:
     GEN1_PATH = os.getenv('GEN1_PATH', os.path.expanduser("~/"))
     FINAL_PATH = os.path.expanduser("/storage/emulated/0/OB_Downloader")
     HISTORY1_PATH = os.path.join(GEN1_PATH, "history.txt")
@@ -102,7 +103,7 @@ def update_history(title, site):
         file.write(json.dumps(history_entry) + "\n")
 
     # Update HISTORY1_PATH if running in Termux
-    if os.path.exists('/data/data/com.termux/files/'):
+    if TERMUX:
         os.makedirs(os.path.dirname(HISTORY1_PATH), exist_ok=True)
         if not os.path.isfile(HISTORY1_PATH):
             with open(HISTORY1_PATH, 'w') as file:
@@ -115,7 +116,7 @@ def update_history(title, site):
     if data["default"][0]["history_backup"] == "y":
         sync_with_drive()
 
-    if platform.system() == 'Linux' and 'com.termux' not in os.getenv('PREFIX', ''):
+    if platform.system() == 'Linux' and not TERMUX:
         os.remove(TEMP_LOC)
     logging.info("History updated and temp file removed.")
     sys.exit()
@@ -135,12 +136,10 @@ def download_video(mode):
     """Download video based on the mode"""
     if "playlist" in link:
         path = os.path.join(GEN_PATH, 'Youtube/%(playlist)s/%(title)s.%(ext)s')
-        thumb = True
     else:
         path = os.path.join(GEN_PATH, 'Youtube/%(title)s.%(ext)s')
-        thumb = True
 
-    if os.path.exists('/data/data/com.termux/files/'):
+    if TERMUX:
         path = os.path.join(FINAL_PATH, '%(title)s.%(ext)s')
 
     with open(JSON_PATH, "r") as file:
@@ -174,7 +173,7 @@ def download_video(mode):
         'writesubtitles': choice,
         'writeautomaticsub': choice,
         'merge_output_format': 'mp4',
-        'writethumbnail': thumb,
+        'writethumbnail': True,
         'format': format,
         'postprocessors': [
             {'key': 'FFmpegEmbedSubtitle', 'already_have_subtitle': False},
@@ -257,7 +256,7 @@ def download_audio(dir_name):
     else:
         op_path = os.path.join(path, '%(title)s.%(ext)s')
 
-    if os.path.exists('/data/data/com.termux/files/usr'):
+    if TERMUX:
         path = os.path.join(FINAL_PATH, dir_name)
         os.makedirs(path, exist_ok=True)
         if "playlist" in link:
@@ -291,7 +290,7 @@ def download_from_others():
     path = os.path.join(GEN_PATH, dir_name)
     os.makedirs(path, exist_ok=True)
 
-    if os.path.exists('/data/data/com.termux/files/'):
+    if TERMUX:
         path = os.path.join(FINAL_PATH, dir_name)
         os.makedirs(path, exist_ok=True)
 
@@ -304,7 +303,7 @@ def download_from_others():
         download_content(opt, site=dir_name)
     except Exception as e:
         logging.error(f"Error downloading from {dir_name}: {e}")
-        if platform.system() == 'Linux' and 'com.termux' not in os.getenv('PREFIX', ''):
+        if platform.system() == 'Linux' and not TERMUX:
             os.rmdir(path)
 
 def download_from_ftp_or_torrent():
@@ -317,7 +316,7 @@ def download_from_ftp_or_torrent():
         path = os.path.join(GEN_PATH, "Downloads")
     os.makedirs(path, exist_ok=True)
 
-    if os.path.exists('/data/data/com.termux/files/usr'):
+    if TERMUX:
         path = os.path.join(FINAL_PATH, "Downloads")
         os.makedirs(path, exist_ok=True)
 
@@ -329,7 +328,7 @@ def download_from_drive():
     path = os.path.join(GEN_PATH, "Gdrive")
     os.makedirs(path, exist_ok=True)
 
-    if os.path.exists('/data/data/com.termux/files/'):
+    if TERMUX:
         path = os.path.join(FINAL_PATH, "Gdrive")
         os.makedirs(path, exist_ok=True)
 
@@ -374,7 +373,7 @@ def master_directory():
         """Remove empty directories"""
         empty_dirs = [root for root, dirs, files in os.walk(GEN_PATH) if not dirs and not files]
         for empty_dir in empty_dirs:
-            if platform.system() == 'Linux' and 'com.termux' not in os.getenv('PREFIX', ''):
+            if platform.system() == 'Linux' and not TERMUX:
                 os.rmdir(empty_dir)
 
     clean_empty_directories()
@@ -411,7 +410,7 @@ if __name__ == "__main__":
             file.write("")
 
     # Ensure HISTORY1_PATH exists if running in Termux
-    if os.path.exists('/data/data/com.termux/files/'):
+    if TERMUX:
         os.makedirs(os.path.dirname(HISTORY1_PATH), exist_ok=True)
         if not os.path.isfile(HISTORY1_PATH):
             with open(HISTORY1_PATH, 'w') as file:
@@ -421,5 +420,5 @@ if __name__ == "__main__":
     master_directory()
 
     # Delete TEMP_LOC if running on Linux but not Termux
-    if os.path.isfile(TEMP_LOC) and platform.system() == 'Linux' and 'com.termux' not in os.getenv('PREFIX', ''):
+    if os.path.isfile(TEMP_LOC) and platform.system() == 'Linux' and not TERMUX:
         os.remove(TEMP_LOC)

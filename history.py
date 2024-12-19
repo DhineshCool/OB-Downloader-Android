@@ -8,7 +8,7 @@ import platform
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Constants
-GEN_PATH = os.path.expanduser("~/Termux_Downloader")
+GEN_PATH = os.path.expanduser("~/OB_Downloader")
 GEN1_PATH = SCRIPT_DIR  # Ensure GEN1_PATH is the same as the script's location
 HISTORY_PATH_GEN = os.path.join(GEN_PATH, "history.txt")
 HISTORY_PATH_GEN1 = os.path.join(GEN1_PATH, "history.txt")
