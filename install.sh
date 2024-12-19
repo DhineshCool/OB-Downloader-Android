@@ -49,7 +49,7 @@ else
     pip install ffmpeg
     pip install gdown
     apt install rclone -y
-    
+
     #Removed Features
     pip3 uninstall termux-apt-repo -y
     pkg remove x11-repo -y
