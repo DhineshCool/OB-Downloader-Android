@@ -13,8 +13,9 @@ GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/Termux_Downloader/"))
 HISTORY_PATH = os.path.join(GEN_PATH, "history.txt")
 
 # Check if running in Termux and set GEN1_PATH and HISTORY1_PATH
-if os.path.exists('/data/data/com.termux/files'):
+if os.path.exists('/data/data/com.termux/files/'):
     GEN1_PATH = os.getenv('GEN1_PATH', os.path.expanduser("~/"))
+    FINAL_PATH = os.path.expanduser("/storage/emulated/0/OB_Downloader")
     HISTORY1_PATH = os.path.join(GEN1_PATH, "history.txt")
 
 # Configure logging
@@ -101,7 +102,7 @@ def update_history(title, site):
         file.write(json.dumps(history_entry) + "\n")
 
     # Update HISTORY1_PATH if running in Termux
-    if os.path.exists('/data/data/com.termux/files'):
+    if os.path.exists('/data/data/com.termux/files/'):
         os.makedirs(os.path.dirname(HISTORY1_PATH), exist_ok=True)
         if not os.path.isfile(HISTORY1_PATH):
             with open(HISTORY1_PATH, 'w') as file:
@@ -138,6 +139,9 @@ def download_video(mode):
     else:
         path = os.path.join(GEN_PATH, 'Youtube/%(title)s.%(ext)s')
         thumb = True
+
+    if os.path.exists('/data/data/com.termux/files/'):
+        path = os.path.join(FINAL_PATH, '%(title)s.%(ext)s')
 
     with open(JSON_PATH, "r") as file:
         data = json.load(file)
@@ -253,6 +257,14 @@ def download_audio(dir_name):
     else:
         op_path = os.path.join(path, '%(title)s.%(ext)s')
 
+    if os.path.exists('/data/data/com.termux/files/usr'):
+        path = os.path.join(FINAL_PATH, dir_name)
+        os.makedirs(path, exist_ok=True)
+        if "playlist" in link:
+            op_path = os.path.join(path, '%(playlist)s/%(title)s.%(ext)s')
+        else:
+            op_path = os.path.join(path, '%(title)s.%(ext)s')
+
     opt = {
         'format': 'bestaudio/best',
         'writethumbnail': True,
@@ -279,6 +291,10 @@ def download_from_others():
     path = os.path.join(GEN_PATH, dir_name)
     os.makedirs(path, exist_ok=True)
 
+    if os.path.exists('/data/data/com.termux/files/'):
+        path = os.path.join(FINAL_PATH, dir_name)
+        os.makedirs(path, exist_ok=True)
+
     opt = {
         'outtmpl': os.path.join(path, "%(title).50s.%(ext)s"),
         'external_downloader': 'aria2c'
@@ -300,6 +316,11 @@ def download_from_ftp_or_torrent():
         logging.info("Downloading from FTP link.")
         path = os.path.join(GEN_PATH, "Downloads")
     os.makedirs(path, exist_ok=True)
+
+    if os.path.exists('/data/data/com.termux/files/usr'):
+        path = os.path.join(FINAL_PATH, "Downloads")
+        os.makedirs(path, exist_ok=True)
+
     os.system(f"aria2c -d '{path}' '{link}' --file-allocation=none")
 
 def download_from_drive():
@@ -307,6 +328,11 @@ def download_from_drive():
     file_id = link.replace("https://drive.google.com/file/d/", "").split("/")[0]
     path = os.path.join(GEN_PATH, "Gdrive")
     os.makedirs(path, exist_ok=True)
+
+    if os.path.exists('/data/data/com.termux/files/'):
+        path = os.path.join(FINAL_PATH, "Gdrive")
+        os.makedirs(path, exist_ok=True)
+
     os.system(f"gdown -O '{path}' --id '{file_id}'")
 
 def link_distributor():
@@ -385,7 +411,7 @@ if __name__ == "__main__":
             file.write("")
 
     # Ensure HISTORY1_PATH exists if running in Termux
-    if os.path.exists('/data/data/com.termux/files/usr'):
+    if os.path.exists('/data/data/com.termux/files/'):
         os.makedirs(os.path.dirname(HISTORY1_PATH), exist_ok=True)
         if not os.path.isfile(HISTORY1_PATH):
             with open(HISTORY1_PATH, 'w') as file:
