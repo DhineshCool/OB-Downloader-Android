@@ -8,8 +8,8 @@ from termcolor import colored
 # Constants
 JSON_PATH = os.getenv('JSON_PATH', os.path.expanduser("~/default.json"))
 TEMP_LOC = os.getenv('TEMP_LOC', os.path.expanduser("~/temp.txt"))
-GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/"))
-HISTORY_PATH = os.getenv('HISTORY_PATH', os.path.expanduser("~/history.txt"))
+GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/Termux_Downloader/"))
+HISTORY_PATH = os.path.join(GEN_PATH, "history.txt")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,6 +38,7 @@ def load_or_create_json_config():
             "7": [{"height": "240", "res": "240p"}],
             "8": [{"height": "144", "res": "144p"}]
         }
+        os.makedirs(os.path.dirname(JSON_PATH), exist_ok=True)
         with open(JSON_PATH, "w") as file:
             json.dump(json_data, file, indent=4)
         logging.info("JSON config created.")
@@ -58,7 +59,7 @@ def ensure_dependencies():
 def sync_with_drive():
     """Sync history with Google Drive using rclone"""
     loc_path = os.path.dirname(sys.argv[0])
-    history_file = os.path.join(loc_path, "history.txt")
+    history_file = HISTORY_PATH
     config = os.path.join(loc_path, "rclone.conf")
     rc_temp = f"rclone --config={config}"
 
@@ -70,7 +71,7 @@ def sync_with_drive():
         remote = config_file.readline().strip().replace('[', '').replace(']', '') + ":"
 
     if not os.path.isfile(history_file):
-        os.system(f"{rc_temp} copy {remote}/history.txt {loc_path}")
+        os.system(f"{rc_temp} copy {remote}/history.txt {GEN_PATH}")
         logging.info("Restored history file from remote.")
 
     logging.info("Syncing with cloud...")
@@ -85,6 +86,11 @@ def update_history(title, site):
         "URL": link,
         "Site": site
     }
+    os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
+    # Create history file if it doesn't exist
+    if not os.path.isfile(HISTORY_PATH):
+        with open(HISTORY_PATH, 'w') as file:
+            file.write("")
     with open(HISTORY_PATH, 'a') as file:
         file.write(json.dumps(history_entry) + "\n")
 
@@ -111,10 +117,10 @@ def download_content(opt, site):
 def download_video(mode):
     """Download video based on the mode"""
     if "playlist" in link:
-        path = os.path.join(GEN_PATH, 'Termux_Downloader/Youtube/%(playlist)s/%(title)s.%(ext)s')
+        path = os.path.join(GEN_PATH, 'Youtube/%(playlist)s/%(title)s.%(ext)s')
         thumb = True
     else:
-        path = os.path.join(GEN_PATH, 'Termux_Downloader/Youtube/%(title)s.%(ext)s')
+        path = os.path.join(GEN_PATH, 'Youtube/%(title)s.%(ext)s')
         thumb = True
 
     with open(JSON_PATH, "r") as file:
@@ -223,7 +229,7 @@ def download_audio(dir_name):
             with open(JSON_PATH, "w") as file:
                 json.dump(data, file)
 
-    path = os.path.join(GEN_PATH, f"Termux_Downloader/{dir_name}/")
+    path = os.path.join(GEN_PATH, dir_name)
     os.makedirs(path, exist_ok=True)
 
     if "playlist" in link:
@@ -254,7 +260,7 @@ def download_from_others():
         dir_name = link.split("://")[1].split(".")[0].capitalize()
 
     logging.info(f"Downloading from {colored(dir_name, 'magenta')}.")
-    path = os.path.join(GEN_PATH, f'Termux_Downloader/{dir_name}/')
+    path = os.path.join(GEN_PATH, dir_name)
     os.makedirs(path, exist_ok=True)
 
     opt = {
@@ -272,17 +278,17 @@ def download_from_ftp_or_torrent():
     """Download content from FTP or torrent links"""
     if "magnet" in link:
         logging.info("Downloading Torrent file from Magnet link.")
-        path = os.path.join(GEN_PATH, "Termux_Downloader/Torrents/")
+        path = os.path.join(GEN_PATH, "Torrents")
     else:
         logging.info("Downloading from FTP link.")
-        path = os.path.join(GEN_PATH, "Termux_Downloader/Downloads/")
+        path = os.path.join(GEN_PATH, "Downloads")
     os.makedirs(path, exist_ok=True)
     os.system(f"aria2c -d '{path}' '{link}' --file-allocation=none")
 
 def download_from_drive():
     """Download content from Google Drive"""
     file_id = link.replace("https://drive.google.com/file/d/", "").split("/")[0]
-    path = os.path.join(GEN_PATH, "Termux_Downloader/Gdrive/")
+    path = os.path.join(GEN_PATH, "Gdrive")
     os.makedirs(path, exist_ok=True)
     os.system(f"gdown -O '{path}' --id '{file_id}'")
 
@@ -295,7 +301,7 @@ def link_distributor():
     elif "music" in link:
         download_audio(dir_name="YTmusic")
     elif "youtube" in link or "youtu.be" in link:
-        path = os.path.join(GEN_PATH, 'Termux_Downloader/Youtube/')
+        path = os.path.join(GEN_PATH, 'Youtube')
         os.makedirs(path, exist_ok=True)
 
         print('Enter \n*(v) for Video \n*(a) for audio \n*(m) for advanced \n*(b) for best')
@@ -319,12 +325,11 @@ def link_distributor():
 
 def master_directory():
     """Create master directory and initiate link distribution"""
-    path = os.path.join(GEN_PATH, "Termux_Downloader/")
-    os.makedirs(path, exist_ok=True)
+    os.makedirs(GEN_PATH, exist_ok=True)
 
     def clean_empty_directories():
         """Remove empty directories"""
-        empty_dirs = [root for root, dirs, files in os.walk(path) if not dirs and not files]
+        empty_dirs = [root for root, dirs, files in os.walk(GEN_PATH) if not dirs and not files]
         for empty_dir in empty_dirs:
             os.rmdir(empty_dir)
 
@@ -354,6 +359,12 @@ if __name__ == "__main__":
 
     with open(TEMP_LOC, "w") as temp_file:
         temp_file.write(link)
+
+    # Ensure history file exists
+    os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
+    if not os.path.isfile(HISTORY_PATH):
+        with open(HISTORY_PATH, 'w') as file:
+            file.write("")
 
     # Start the master directory process
     master_directory()
