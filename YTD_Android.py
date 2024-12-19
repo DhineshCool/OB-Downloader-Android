@@ -116,8 +116,7 @@ def update_history(title, site):
     if data["default"][0]["history_backup"] == "y":
         sync_with_drive()
 
-    if platform.system() == 'Linux' and not TERMUX:
-        os.remove(TEMP_LOC)
+    os.remove(TEMP_LOC)
     logging.info("History updated and temp file removed.")
     sys.exit()
 
@@ -303,8 +302,7 @@ def download_from_others():
         download_content(opt, site=dir_name)
     except Exception as e:
         logging.error(f"Error downloading from {dir_name}: {e}")
-        if platform.system() == 'Linux' and not TERMUX:
-            os.rmdir(path)
+        os.rmdir(path)
 
 def download_from_ftp_or_torrent():
     """Download content from FTP or torrent links"""
@@ -373,8 +371,7 @@ def master_directory():
         """Remove empty directories"""
         empty_dirs = [root for root, dirs, files in os.walk(GEN_PATH) if not dirs and not files]
         for empty_dir in empty_dirs:
-            if platform.system() == 'Linux' and not TERMUX:
-                os.rmdir(empty_dir)
+            os.rmdir(empty_dir)
 
     clean_empty_directories()
     link_distributor()
@@ -419,6 +416,6 @@ if __name__ == "__main__":
     # Start the master directory process
     master_directory()
 
-    # Delete TEMP_LOC if running on Linux but not Termux
-    if os.path.isfile(TEMP_LOC) and platform.system() == 'Linux' and not TERMUX:
+    # Delete TEMP_LOC
+    if os.path.isfile(TEMP_LOC):
         os.remove(TEMP_LOC)
