@@ -12,6 +12,11 @@ TEMP_LOC = os.getenv('TEMP_LOC', os.path.expanduser("~/temp.txt"))
 GEN_PATH = os.getenv('GEN_PATH', os.path.expanduser("~/Termux_Downloader/"))
 HISTORY_PATH = os.path.join(GEN_PATH, "history.txt")
 
+# Check if running in Termux and set GEN1_PATH and HISTORY1_PATH
+if os.path.exists('/data/data/com.termux/files'):
+    GEN1_PATH = os.getenv('GEN1_PATH', os.path.expanduser("~/"))
+    HISTORY1_PATH = os.path.join(GEN1_PATH, "history.txt")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -94,6 +99,15 @@ def update_history(title, site):
             file.write("")
     with open(HISTORY_PATH, 'a') as file:
         file.write(json.dumps(history_entry) + "\n")
+
+    # Update HISTORY1_PATH if running in Termux
+    if os.path.exists('/data/data/com.termux/files'):
+        os.makedirs(os.path.dirname(HISTORY1_PATH), exist_ok=True)
+        if not os.path.isfile(HISTORY1_PATH):
+            with open(HISTORY1_PATH, 'w') as file:
+                file.write("")
+        with open(HISTORY1_PATH, 'a') as file:
+            file.write(json.dumps(history_entry) + "\n")
 
     with open(JSON_PATH, "r") as file:
         data = json.load(file)
@@ -369,6 +383,13 @@ if __name__ == "__main__":
     if not os.path.isfile(HISTORY_PATH):
         with open(HISTORY_PATH, 'w') as file:
             file.write("")
+
+    # Ensure HISTORY1_PATH exists if running in Termux
+    if os.path.exists('/data/data/com.termux/files/usr'):
+        os.makedirs(os.path.dirname(HISTORY1_PATH), exist_ok=True)
+        if not os.path.isfile(HISTORY1_PATH):
+            with open(HISTORY1_PATH, 'w') as file:
+                file.write("")
 
     # Start the master directory process
     master_directory()
