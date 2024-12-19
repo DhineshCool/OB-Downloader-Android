@@ -2,13 +2,17 @@ import os
 import sys
 import json
 import linecache
+import logging
 from termcolor import colored
 
 # Constants
-JSON_PATH = "/data/data/com.termux/files/home/default.json"
-TEMP_LOC = "/data/data/com.termux/files/home/temp.txt"
-GEN_PATH = "/storage/emulated/0/"
-HISTORY_PATH = "/data/data/com.termux/files/home/history.txt"
+JSON_PATH = os.getenv('JSON_PATH', "/data/data/com.termux/files/home/default.json")
+TEMP_LOC = os.getenv('TEMP_LOC', "/data/data/com.termux/files/home/temp.txt")
+GEN_PATH = os.getenv('GEN_PATH', "/storage/emulated/0/")
+HISTORY_PATH = os.getenv('HISTORY_PATH', "/data/data/com.termux/files/home/history.txt")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Version Info
 def print_version_info():
@@ -16,9 +20,9 @@ def print_version_info():
     engine = linecache.getline(sys.argv[0], 2).replace("#", "")
     build = linecache.getline(sys.argv[0], 3).replace("#", "")
 
-    print(version)
-    print(engine)
-    print(f"Build: {build}")
+    logging.info(version)
+    logging.info(engine)
+    logging.info(f"Build: {build}")
     linecache.clearcache()
 
 # Load or Create JSON Config
@@ -37,6 +41,7 @@ def load_or_create_json_config():
         }
         with open(JSON_PATH, "w") as file:
             json.dump(json_data, file, indent=4)
+        logging.info("JSON config created.")
 
 # Ensure Dependencies are Installed
 def ensure_dependencies():
@@ -44,10 +49,12 @@ def ensure_dependencies():
         import ffmpeg
     except ModuleNotFoundError:
         os.system('pip install ffmpeg')
+        logging.info("Installed ffmpeg.")
     try:
         import yt_dlp
     except ModuleNotFoundError:
-        os.system('pip install --no-deps -U yt-dlp')
+        os.system('pip install --no-deps -U yt_dlp')
+        logging.info("Installed yt_dlp.")
 
 # Sync with Google Drive
 def sync_with_drive():
@@ -58,16 +65,18 @@ def sync_with_drive():
 
     if not os.path.isfile(config):
         os.system(f"{rc_temp} config")
+        logging.info("Configured rclone.")
 
     remote = open(config, 'r').readline().replace('[', '').replace(']', '').replace('\n', '') + ":"
 
     if not os.path.isfile(history_file):
         os.system(f"{rc_temp} copy {remote}/history.txt {loc_path}")
+        logging.info("Restored history file from remote.")
 
-    print("\nSYNCING WITH CLOUD:\n")
+    logging.info("Syncing with cloud...")
     os.system(f"{rc_temp} --verbose copy --update {history_file} {remote}")
 
-# History Management
+# Update History
 def update_history(title, site):
     title = title.replace('"', "`").replace("'", "`")
     history_entry = {
@@ -85,17 +94,21 @@ def update_history(title, site):
         sync_with_drive()
 
     os.remove(TEMP_LOC)
-    exit()
+    logging.info("History updated and temp file removed.")
+    sys.exit()
 
-# Download Functionality
+# Download Content
 def download_content(opt, site):
     import yt_dlp
-    with yt_dlp.YoutubeDL(opt) as yt:
-        info = yt.extract_info(link, download=True)
-        title = info.get('title', None)
-        update_history(title, site)
+    try:
+        with yt_dlp.YoutubeDL(opt) as yt:
+            info = yt.extract_info(link, download=True)
+            title = info.get('title', None)
+            update_history(title, site)
+    except Exception as e:
+        logging.error(f"Error downloading content: {e}")
 
-# Video Download
+# Download Video
 def download_video(mode):
     if "playlist" in link:
         path = os.path.join(GEN_PATH, 'Termux_Downloader/Youtube/%(playlist)s/%(title)s.%(ext)s')
@@ -108,18 +121,18 @@ def download_video(mode):
         data = json.load(file)
 
     if mode == "Youtube":
-        print("Downloading video from YouTube:\n")
+        logging.info("Downloading video from YouTube.")
         code = get_or_update_resolution_code(data)
         j = data[code][0]["height"]
         k = data[code][0]["res"]
 
-        print(f'Note: The video will download in {k} Resolution if YouTube has such resolution. If not, it will download the best available resolution.\n')
+        logging.info(f'Note: The video will download in {k} Resolution if YouTube has such resolution. If not, it will download the best available resolution.')
         format = f'bestvideo[height<={j}]+bestaudio[ext=m4a]/best[height<={j}]/best[ext=m4a]'
     elif mode == "best":
-        print("Downloading best one from YouTube:\n")
+        logging.info("Downloading best one from YouTube.")
         format = 'best'
     elif mode == "advanced":
-        print("Downloading from YouTube - Advanced mode:\n")
+        logging.info("Downloading from YouTube - Advanced mode.")
         os.system(f"yt-dlp -F {link}")
         vid = input('Video id: \n')
         aid = input('Audio id: \n')
@@ -127,7 +140,7 @@ def download_video(mode):
     else:
         link_distributor()
 
-    choice = input("Do you need subtitle? If yes, type 'y' or skip! :") == "y"
+    choice = input("Do you need subtitle? If yes, type 'y' or skip: ").lower() == "y"
 
     opt = {
         'external_downloader': 'aria2c',
@@ -167,7 +180,7 @@ def get_or_update_resolution_code(data):
     else:
         code = data["default"][0]["code"]
         k = data[code][0]["res"]
-        choice = input(f"Default resolution is {k}. If you want to download in different resolution type (y) or skip: ")
+        choice = input(f"Default resolution is {k}. If you want to download in different resolution type (y) or skip: ").lower()
         if choice == "y":
             print('Enter the respective code for Required Resolution:')
             print('[code] - [Resolution]')
@@ -188,9 +201,9 @@ def get_or_update_resolution_code(data):
 
     return code
 
-# Audio Download
+# Download Audio
 def download_audio(dir_name):
-    print(f"Downloading songs from {dir_name}:\n")
+    logging.info(f"Downloading songs from {dir_name}.")
     with open(JSON_PATH, "r") as file:
         data = json.load(file)
 
@@ -202,7 +215,7 @@ def download_audio(dir_name):
             json.dump(data, file)
     else:
         codec = data["default"][0]["codec"]
-        choice = input(f"Default audio codec is {codec}. If you need to download in different codec type (y) or else skip: ")
+        choice = input(f"Default audio codec is {codec}. If you need to download in different codec type (y) or else skip: ").lower()
         if choice == "y":
             codec = input('Enter the Format of audio (mp3, aac, m4a, flac....): ')
             data["default"][0]["codec"] = codec
@@ -231,11 +244,7 @@ def download_audio(dir_name):
         ]
     }
 
-    if dir_name == "YTmusic":
-        site = "Youtube Music"
-    else:
-        site = "Youtube"
-
+    site = "Youtube Music" if dir_name == "YTmusic" else "Youtube"
     download_content(opt, site=site)
 
 # Download from Other Sites
@@ -245,7 +254,7 @@ def download_from_others():
     else:
         dir_name = link.split("://")[1].split(".")[0].capitalize()
 
-    print(f"Downloading from {colored(dir_name, 'magenta')}\n")
+    logging.info(f"Downloading from {colored(dir_name, 'magenta')}.")
     path = os.path.join(GEN_PATH, f'Termux_Downloader/{dir_name}/')
 
     if not os.path.isdir(path):
@@ -258,16 +267,17 @@ def download_from_others():
 
     try:
         download_content(opt, site=dir_name)
-    except Exception:
+    except Exception as e:
         os.rmdir(path)
+        logging.error(f"Error downloading from {dir_name}: {e}")
 
 # Download from FTP or Torrent
 def download_from_ftp_or_torrent():
     if "magnet" in link:
-        print("Downloading Torrent file from Magnet link:\n")
+        logging.info("Downloading Torrent file from Magnet link.")
         path = os.path.join(GEN_PATH, "Termux_Downloader/Torrents/")
     else:
-        print("Downloading from FTP link:\n")
+        logging.info("Downloading from FTP link.")
         path = os.path.join(GEN_PATH, "Termux_Downloader/Downloads/")
 
     if not os.path.isdir(path):
@@ -304,7 +314,7 @@ def link_distributor():
         elif T == "m":
             download_video(mode="advanced")
         elif T == "a":
-            print("Downloading Audio track from YouTube:")
+            logging.info("Downloading Audio track from YouTube.")
             download_audio(dir_name="Youtube")
         elif T == "b":
             download_video(mode="best")
@@ -341,7 +351,11 @@ if __name__ == "__main__":
     ensure_dependencies()
 
     # Extract link from arguments
-    link = sys.argv[1]
+    if len(sys.argv) > 1:
+        link = sys.argv[1]
+    else:
+        logging.error("No link provided.")
+        sys.exit(1)
 
     # Handle temp file operations
     if os.path.isfile(TEMP_LOC):
