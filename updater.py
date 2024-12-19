@@ -4,145 +4,124 @@ import json
 import linecache
 import requests
 import re
-from termcolor import colored , cprint
+from termcolor import colored, cprint
 from bs4 import BeautifulSoup
-from datetime import date , datetime
+from datetime import datetime, date
 import time
+
 start = time.time()
 
-cprint("WELCOME TO TERMUX DOWNLOADER","cyan","on_red",attrs=["bold"])
+cprint("WELCOME TO OB DOWNLOADER", "cyan", "on_red", attrs=["bold"])
 
-#Local Version No:
-l_version = linecache.getline(r"/data/data/com.termux/files/home/main.py", 1)
-#Local Engine No:
-l_engine = linecache.getline(r"/data/data/com.termux/files/home/main.py", 2)
+# Local Version and Engine Numbers
+LOCAL_PATH = r"/data/data/com.termux/files/home/main.py"
+l_version = linecache.getline(LOCAL_PATH, 1)
+l_engine = linecache.getline(LOCAL_PATH, 2)
 
-#Update Failsafe Bypasser
-try:
-    #Cloud Version No:
-    def cv(soup):
+def fetch_version_and_engine(soup):
+    """Fetch cloud version and engine numbers from the soup."""
+    def fetch_version():
         vindex = soup.find("#Version")
         ver = soup[vindex + len("#Version"):vindex + len("#Version") + 8]
-        c_version = "#Version" +ver+"\n"
-
-        #Version number pattern verification:
-        v = ver.replace(" ","")
-        v_pattern = r"^\d+.\d+.\d+.\d+$"
-        if re.match(v_pattern, v):
+        c_version = "#Version" + ver + "\n"
+        if re.match(r"^\d+\.\d+\.\d+\.\d+$", ver.replace(" ", "")):
             return c_version
         else:
-            print(colored('\n__Update_server_timeout__','red'))
+            cprint('\n__Update_server_timeout__', 'red')
             return l_version
-    
-    #Cloud Engine No:
-    def ce(soup):
+
+    def fetch_engine():
         eindex = soup.find("#Engine")
         eng = soup[eindex + len("#Engine"):eindex + len("#Engine") + 4]
-        c_engine = "#Engine"+eng+"\n"
-
-        #Engine number pattern verification:
-        e = eng.replace(" ","")
-        e_pattern = r"^\d+.\d+$"
-        if re.match(e_pattern, e):
+        c_engine = "#Engine" + eng + "\n"
+        if re.match(r"^\d+\.\d+$", eng.replace(" ", "")):
             return c_engine
         else:
-            print(colored('\n__Update_server_timeout__','red'))   
+            cprint('\n__Update_server_timeout__', 'red')
             return l_engine
 
-    #Getting cloud edition's version and engine number
-    url = "https://github.com/DrDelin/Youtube-Downloader-Android/blob/master/YTD_Android.py"
-    request  = requests.get(url)
-    soup = BeautifulSoup(request.content, 'html.parser').text
-    
-    c_version = cv(soup)
-    c_engine = ce(soup)
-    
-    print("\nUpdate Server: "+colored('ACTIVE','green')+"\nFailsafe Update Verification System By-Passer: "+colored('DEACTIVATED','green')+"\nAuto Upgrade System: "+colored('ACTIVE','green')+"\nDownloader: "+colored('ACTIVE & RUNNING','green')+"\n")
+    return fetch_version(), fetch_engine()
 
+try:
+    url = "https://github.com/DhineshCool/OB-Downloader-Android/blob/master/YTD_Android.py"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser').text
+    c_version, c_engine = fetch_version_and_engine(soup)
+    print(f"\nUpdate Server: {colored('ACTIVE', 'green')}\n"
+          f"Failsafe Update Verification System By-Passer: {colored('DEACTIVATED', 'green')}\n"
+          f"Auto Upgrade System: {colored('ACTIVE', 'green')}\n")
 except:
-    print("\nFailsafe Update Verification System By-Passer: "+colored('ACTIVATED','red')+"\nUpdate Server: "+colored('BROKEN OR DOWN','red')+"\nAuto Upgrade System: "+colored('ACTIVE','green')+" \nServer repair: "+colored('ONGOING','red')+"\nDownloader: "+colored('ACTIVE & RUNNING','green')+"\n")
-    c_version = l_version
-    c_engine = l_engine 
+    print(f"\nFailsafe Update Verification System By-Passer: {colored('ACTIVATED', 'red')}\n"
+          f"Update Server: {colored('BROKEN OR DOWN', 'red')}\n"
+          f"Auto Upgrade System: {colored('ACTIVE', 'green')}\n")
+    c_version, c_engine = l_version, l_engine
 
-#Ping:
 end = time.time()
-print(f"\n[Ping: {(end-start)*10**3:.02f}mS]\n")
+print(f"\n[Ping: {(end-start)*10**3:.02f}ms]\n")
 
-#Code to pass link to the downloader / Manual upgrader
-if not sys.argv[1] == "forced":
-    code = "python '/data/data/com.termux/files/home/main.py' '" +sys.argv[1] +"'"
-    
+def handle_upgrade():
+    """Handle upgrade process based on version and engine comparison."""
     if c_engine == l_engine:
         print("\nNo Engine upgrade available from developer...\n")
-
-        #Auto Upgrade segment
-        path = "/data/data/com.termux/files/home/default.json"
-        if os.path.isfile(path):
-            date1 = date.today().strftime("%d/%m/%Y")
-            with open(path, "r") as defaultFile:
-                data = json.load(defaultFile)
-                if data["default"][0]["last_upgrade"] == "":
-                    print("Script upgrading on: " + date1)
-                    data["default"][0]["last_upgrade"] = date1
-                    date2 = date1
-                    with open(path, "w") as defaultFile:
-                            json.dump(data, defaultFile, indent=4)
-                    defaultFile.close
-                else:
-                    date2 = data["default"][0]["last_upgrade"]
-                    print("Script previously upgraded on: "+colored(date2,'blue'))
-                    defaultFile.close
-            dates = datetime.strptime(date1, "%d/%m/%Y")  - datetime.strptime(date2, "%d/%m/%Y")
-            if int(dates.days) > int("28"):
-                print("\nOutdated Binaries, auto upgrading...\n")
-                with open(path, "r") as defaultFile:
-                    data = json.load(defaultFile)
-                    data["default"][0]["last_upgrade"] = date1
-                    with open(path, "w") as defaultFile:
-                        json.dump(data, defaultFile, indent=4)
-                        defaultFile.close
-                    os.system("sh refresh.sh auto")
-            else:
-                print("\nBinaries seems to be new. Auto upgrade skipped...\n\nChecking version update...\n")
-        else:
-            print("\nChecking version update...\n")
-
-        if c_version == l_version:
-            print("\nNo new update...\n")
-            os.system(code)
-        else:
-            print("\nNew version available...\n\nUpdating...\n\n")
-            open('/data/data/com.termux/files/home/noobjection.temp', 'a').close()
-            os.system("sh refresh.sh auto")
-            print("\nUpdated...!\n")
-            os.system(code)
+        auto_upgrade()
     else:
         print("\nNew Engine Upgrade available...\n\nUpgrading...\n")
-
-        #Upgrade date recording:
-        path = "/data/data/com.termux/files/home/default.json"
-        date1 = date.today().strftime("%d/%m/%Y")
-        with open(path, "r") as defaultFile:
-                    data = json.load(defaultFile)
-                    data["default"][0]["last_upgrade"] = date1
-                    with open(path, "w") as defaultFile:
-                        json.dump(data, defaultFile, indent=4)
-                        defaultFile.close
-
-        #Upgrade                
+        record_upgrade_date()
         os.system("sh refresh.sh auto")
         print("Upgraded...!\n")
         os.system(code)
-#Forced Manual upgrade / Troubleshoot date recorder
-else:
+
+def auto_upgrade():
+    """Handle auto upgrade based on version and engine comparison."""
     path = "/data/data/com.termux/files/home/default.json"
     if os.path.isfile(path):
         date1 = date.today().strftime("%d/%m/%Y")
-        with open(path, "r") as defaultFile:
-                    data = json.load(defaultFile)
-                    data["default"][0]["last_upgrade"] = date1
-                    with open(path, "w") as defaultFile:
-                        json.dump(data, defaultFile, indent=4)
-                        defaultFile.close
+        with open(path, "r") as default_file:
+            data = json.load(default_file)
+            last_upgrade = data["default"][0].get("last_upgrade", "")
+            if not last_upgrade:
+                data["default"][0]["last_upgrade"] = date1
+                last_upgrade = date1
+                with open(path, "w") as default_file_w:
+                    json.dump(data, default_file_w, indent=4)
+            else:
+                print(f"Script previously upgraded on: {colored(last_upgrade, 'blue')}")
+            dates_diff = datetime.strptime(date1, "%d/%m/%Y") - datetime.strptime(last_upgrade, "%d/%m/%Y")
+            if dates_diff.days > 28:
+                print("\nOutdated Binaries, auto upgrading...\n")
+                data["default"][0]["last_upgrade"] = date1
+                with open(path, "w") as default_file_w:
+                    json.dump(data, default_file_w, indent=4)
+                os.system("sh refresh.sh auto")
+            else:
+                print("\nBinaries seem to be new. Auto upgrade skipped...\n\nChecking version update...\n")
     else:
-        pass
+        print("\nChecking version update...\n")
+
+    if c_version == l_version:
+        print("\nNo new update...\n")
+        os.system(code)
+    else:
+        print("\nNew version available...\n\nUpdating...\n\n")
+        open('/data/data/com.termux/files/home/noobjection.temp', 'a').close()
+        os.system("sh refresh.sh auto")
+        print("\nUpdated...!\n")
+        os.system(code)
+
+def record_upgrade_date():
+    """Record the date of upgrade in the default.json file."""
+    path = "/data/data/com.termux/files/home/default.json"
+    date1 = date.today().strftime("%d/%m/%Y")
+    if os.path.isfile(path):
+        with open(path, "r") as default_file:
+            data = json.load(default_file)
+            data["default"][0]["last_upgrade"] = date1
+            with open(path, "w") as default_file_w:
+                json.dump(data, default_file_w, indent=4)
+
+if __name__ == "__main__":
+    code = f"python '/data/data/com.termux/files/home/main.py' '{sys.argv[1]}'"
+    if sys.argv[1] != "forced":
+        handle_upgrade()
+    else:
+        record_upgrade_date()

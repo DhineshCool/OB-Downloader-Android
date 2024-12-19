@@ -1,11 +1,14 @@
 WELCOME TO TERMUX!
 
-Modified for : Youtube-Downloader-Android
-Modified by  : Dr.Delin (dev)
+Modified for    : Youtube-Downloader-Android
+Modified by     : Dr.Delin (dev)
+Adapt for linux : Cool585 (co-dev)
 
 Termux Official download site : https://github.com/termux/termux-app/releases
 
-Script Official download site : https://github.com/DrDelin/Youtube-Downloader-Android
+Original Script download site : https://github.com/DrDelin/Youtube-Downloader-Android
+
+OB-Downloader site            : https://github.com/DhineshCool/OB-Downloader-Android
 
 Script Troubleshooting:
 
@@ -18,5 +21,5 @@ Utilities:
  
 Languages used for scripting: Python, Shell, Json
 
-Report issues at https://github.com/DrDelin/Youtube-Downloader-Android/issues
+Report issues at https://github.com/DhineshCool/OB-Downloader-Android/issues
 

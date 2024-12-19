@@ -33,7 +33,7 @@ if [ -e '/data/data/com.termux/files/home/noobjection.temp' ]; then
     echo
     echo UPDATE / UPGRADE SUCCESSFUL!
     #Setup package purging:
-    rm -rf "/data/data/com.termux/files/home/Youtube-Downloader-Android"
+    rm -rf "/data/data/com.termux/files/home/OB-Downloader-Android"
     sleep 5
     exit
 else
@@ -61,12 +61,12 @@ else
     apt upgrade -y -y -y
     apt update -y -y -y
     apt autoremove -y -y -y
-    cat /data/data/com.termux/files/home/Youtube-Downloader-Android/README.md
-    
-        
+    cat /data/data/com.termux/files/home/OB-Downloader-Android/README.md
+
+
     #Setup package purging:
-    rm -rf "/data/data/com.termux/files/home/Youtube-Downloader-Android"
-    
+    rm -rf "/data/data/com.termux/files/home/OB-Downloader-Android"
+
     #Installation completion message
     echo
     echo INSTALLTION SUCCESSFUL!
