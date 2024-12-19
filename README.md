@@ -1,93 +1,150 @@
-# OB Downloader Android (...aka Youtube-Downloader-Android)
-  ### History of developement of this script
-  Hi all! This script was once intended to download video and audio, only from youtube. Later it is extended to download videos from almost all sites and social media, torrents and Google drive. This script based on Termux app for downloading. Hence it is Termux Downloader.
+# OB Downloader Android (aka Youtube-Downloader-Android)
 
-  ### additional stuffs ###
-  * code was ported to work on linux environment and termux by cool585 
-  * Thnx original author i motivated to port on linux this made my life easier , hope everyone like it
-  * And due to linux support i changed name to OB_Downloader
+## History of Development
 
-  ### Developers
-  * Owner and Developer: **Dr.Delin @DrDelin**
-  * Co-Developer and script optimizer: **Dr.Senthil Manikandan @Senthil360**
-  * Co-Developer and linux_porter: **Dr.Dhinesh Cool @cool585**
+  Hi all! This script was initially intended to download video and audio from YouTube. Later, it was extended to download videos from almost all sites and social media platforms, torrents, and Google Drive. This script is based on the Termux app for downloading, hence it is called Termux Downloader, Now it is OB-Downloader.
 
+## Additional Information
 
-## Installation for Android(Stable version):
+- The code was ported to work on both Linux environments and Termux by **@cool585**.
+- Thanks to the original author, I was motivated to port it to Linux, making my life easier. I hope everyone likes it.
+- Due to the Linux support, the name was changed to **OB_Downloader**.
 
-  1. Install termux from github https://github.com/termux/termux-app/releases
-     (arm64 recommended ,use arm only for device lower than android 7)
-  2. Type the commands or just copy or use the *copy button* provided and **Paste it on termux**:
-      ```
-      pkg up -y -y -y -y
-      pkg install git -y
-      git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch
-      cd OB-Downloader-Android
-      sh install.sh
-        ```
-  3. Press ALLOW to give storage permission
-  4. (Important) For Android 10 or above users: Go to app settings -> Termux app settings -> Give ALLOW to "Display over other apps" permission for working of this script 
+## Developers
 
- ## Troubleshooting or repairing:
-  Incase if the program not working properly or not downloading or showing errors, just follow these steps,
-  1. Open termux app
-  2. Type ```sh refresh.sh```
-  3. Program gets clean installed or returned to factory default
+- **Owner and Developer:** Dr.Delin ([@DrDelin](https://github.com/DrDelin))
+- **Co-Developer and Script Optimizer:** Dr.Senthil Manikandan ([@Senthil360](https://github.com/Senthil360))
+- **Co-Developer and Linux Porter:** Dr.Dhinesh Cool ([@cool585](https://github.com/cool585))
 
-## Installation for Linux (Stable version):
-  1. clone on any terminal
-       ```
-       git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch
-       cd OB-Downloader-Android
-       ./setup_linux.sh
-       ```
-  2. make sure every dependencies are downloaded or manually do
-  3. Run the script by
-     ```python YTD_Android.py "https://example.com/video"```
+## Installation Guide
 
-## Usage:
-  ### How to download videos or audio:
-  1. Open the desired video or audio or playlist or site in which the video is present.
-  2. Select share option (used to share the link)
-  3. Select TERMUX from the share list
-  4. Thats all! Your video / audio / playlist will download (Location: Internal storage of your device -> OB-Downloader)
-  5. (For Youtube Download) Select Video / audio / best -> Select required resolution once, later it is set as default (can be changed if you type "y") -> skip next (unless if you want custom format) -> type "y" if you need subtitle(Subtitle only available if only youtube has..) -> Forget rest!... My script will take care
-  6. (For Youtube Music / audio from youtube) Type your favourite audio codec (like mp3, m4a, aac, webm, flac...) for one time as default (can be changed later) -> Audio will be downloaded in your favourite codec
-  7. Note: This script is completely automated, hence the program closes itself after downloading.. Hence, Share your link to Termux.. Go get some coffee..! See your file will be in internal storage of the device 
+### For Android (Stable Version)
+1. Install Termux from GitHub: [Termux Releases](https://github.com/termux/termux-app/releases)
+   - (ARM64 recommended, use ARM only for devices lower than Android 7)
+     
+2. Open Termux and type the following commands:
+   
+    ```sh
+    pkg up -y -y -y -y
+    pkg install git -y
+    git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch
+    cd OB-Downloader-Android
+    sh install.sh
+    ```
+3. Press **ALLOW** to give storage permission.
+4. (Important) For Android 10 or above users: Go to **App Settings -> Termux App Settings -> Allow "Display over other apps"** permission for the script to work properly.
 
+### For Linux (Stable Version)
 
-## Features:
-  ### History:
-  1. The name, site of download, and URL of the files downloaded by this script are saved as history. 
-  2. Don't get panicked... Only typing a code makes it visible, otherwise none will know about history.
-  3. History feature is created to:
-      * Redownload the file which is previously downloaded 
-      * Revisit the site from which the file is downloaded 
-  4. You can clear the history too...!!
-  5. Code to see history is ```python history.py```
+1. Clone the repository on any terminal:
+   
+    ```sh
+    git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch
+    cd OB-Downloader-Android
+    ./setup_linux.sh
+    ```
+2. Ensure all dependencies are downloaded or manually install them.
 
-  ### Updates:
-  1. Updates are completly automatic and you won't need to worry about it.
-  2. If you are facing any issue on new update or having any suggestions on a new feature, make it a note in issue section
+3. Run the script:
 
-## (Not Recommended!)(Developers only)Beta Channel installation or switch over btw Stable and Beta:
-  Warning! This Channel is only for DEVELOPER'S BETA TESTING! May have bugs and fatal flaws. Hence, PROCEED WITH CAUTION.
-  ## Beta channel fresh installation:
-  
-      pkg up -y -y -y -y
-      pkg install git -y
-      git clone https://github.com/DrDelin/Youtube-Downloader-Android/ -b Sigma-D --single-branch
-      cd Youtube-Downloader-Android
-      sh install.sh
-  
-  ### Switch between Stable and Beta:
-  1. Open termux
-  2. (For first time only) pkg install vim-gtk -y
-  3. Edit refresh.sh file with ```vi refresh.sh```
-  4. Change the 12th line,  
-      a. Stable -> Beta: change ***master*** to ***Sigma-D***   
-      b. Beta -> Stable: change ***Sigma-D*** to ***master***  
-  5. Exit vim editor(esc -> :wq -> enter)
-  6. Then, run ```sh refresh.sh```
+    ```sh
+    python YTD_Android.py "https://example.com/video"
+    ```
 
-  Warning!! Again this is strictly for developers.. So, Recommended to use Stable version. 
+## Troubleshooting or Repair
+If the program is not working properly, showing errors, or not downloading:
+1. Open the Termux app.
+   
+2. Type:
+
+    ```sh
+    sh refresh.sh
+    ```
+3. The program will be clean-installed or returned to factory default.
+
+## Usage Guide
+
+### How to Download Videos or Audio
+
+1. Open the desired video, audio, playlist, or site.
+2. Select the **Share** option.
+3. Select **TERMUX** from the share list.
+4. Your video/audio/playlist will download (Location: Internal storage of your device -> OB-Downloader).
+5. For YouTube Downloads:
+   - Select **Video / Audio / Best**.
+   - Select the required resolution once, it will be set as default (can be changed later).
+   - Skip the next step unless you want a custom format.
+   - Type **"y"** if you need subtitles (available only if YouTube has them).
+   - The script will take care of the rest.
+
+6. For YouTube Music / Audio from YouTube:
+   - Type your favorite audio codec (e.g., mp3, m4a, aac, webm, flac...) once as default (can be changed later).
+   - The audio will be downloaded in your preferred codec.
+
+7. Note: This script is completely automated, and the program closes itself after downloading.
+
+## Features
+
+### History
+
+1. The name, site of download, and URL of the downloaded files are saved as history.
+
+2. History is visible only by typing a specific code, ensuring privacy.
+
+3. History can be used to:
+   - Redownload previously downloaded files.
+   - Revisit the site from which the file was downloaded.
+
+4. History can be cleared.
+5. Code to see history:
+
+    ```sh
+    python history.py
+    ```
+
+### Updates
+
+1. Updates are completely automatic.
+2. If you face any issues with new updates or have suggestions for new features, please note them in the issue section.
+
+## Beta Channel Installation or Switch Between Stable and Beta (Not Recommended for General Users)
+
+### Beta Channel Installation
+
+1. Open Termux and type the following commands:
+    ```sh
+    pkg up -y -y -y -y
+    pkg install git -y
+    git clone https://github.com/DrDelin/Youtube-Downloader-Android/ -b Sigma-D --single-branch
+    cd Youtube-Downloader-Android
+    sh install.sh
+    ```
+
+### Switch Between Stable and Beta
+1. Open Termux.
+ 
+2. For the first time only, install vim-gtk:
+
+    ```sh
+    pkg install vim-gtk -y
+    ```
+3. Edit the `refresh.sh` file:
+
+    ```sh
+    vi refresh.sh
+    ```
+4. Change the 12th line:
+   - Stable to Beta: change **master** to **Sigma-D**.
+   - Beta to Stable: change **Sigma-D** to **master**.
+
+5. Exit vim editor (press `esc`, type `:wq`, and press `enter`).
+
+6. Run:
+
+    ```sh
+    sh refresh.sh
+    ```
+
+**Warning:** This channel is strictly for developers and may contain bugs. It is recommended to use the stable version.
+
+---
