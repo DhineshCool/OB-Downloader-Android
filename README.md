@@ -35,11 +35,15 @@
   3. Program gets clean installed or returned to factory default
 
 ## Installation for Linux (Stable version):
-  1. clone on any terminal """ git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch """
-  2. cd OB-Downloader-Android
-  3. run ./setup_linux.sh
-  4. make sure every dependencies are downloaded or manually do
-  5. Run the script by "" python YTD_Android.py "https://example.com/video" ""
+  1. clone on any terminal
+       ```
+       git clone https://github.com/DhineshCool/OB-Downloader-Android/ -b master --single-branch
+       cd OB-Downloader-Android
+       ./setup_linux.sh
+       ```
+  2. make sure every dependencies are downloaded or manually do
+  3. Run the script by
+     ```python YTD_Android.py "https://example.com/video"```
 
 ## Usage:
   ### How to download videos or audio:
