@@ -3,6 +3,9 @@
 # Variables
 VENV_DIR="myenv"
 
+# Install ffmpeg system-wide
+sudo apt install ffmpeg -y
+
 # Create a virtual environment
 python3 -m venv $VENV_DIR
 
