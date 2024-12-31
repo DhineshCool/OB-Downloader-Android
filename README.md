@@ -50,6 +50,8 @@
     ```sh
     python YTD_Android.py "https://example.com/video"
     ```
+4. save location :
+    /home/"username"/OB_Downloader
 
 ## Troubleshooting or Repair
 If the program is not working properly, showing errors, or not downloading:
