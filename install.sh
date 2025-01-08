@@ -50,12 +50,6 @@ else
     pip install gdown
     apt install rclone -y
 
-    #Removed Features
-    pip3 uninstall termux-apt-repo -y
-    pkg remove x11-repo -y
-    pkg remove wget -y
-    apt remove transmission-gtk -y
-
     #Updates and upgrades:
     apt update -y -y -y
     apt upgrade -y -y -y
