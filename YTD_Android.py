@@ -300,7 +300,9 @@ def download_from_others():
 
     opt = {
         'outtmpl': os.path.join(path, "%(title).50s.%(ext)s"),
-        'external_downloader': 'aria2c'
+        'external_downloader': 'aria2c',
+        'writesubtitles' : True,
+        'writeautomaticsub' : True,
     }
 
     try:
