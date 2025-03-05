@@ -10,14 +10,9 @@ Original Script download site : https://github.com/DrDelin/Youtube-Downloader-An
 
 OB-Downloader site            : https://github.com/DhineshCool/OB-Downloader-Android
 
-Script Troubleshooting:
+(New)Utilities:
 
- - Factory resetting script type: sh refresh.sh
-
-Utilities:
-
- - To view history  : python history.py
- - To force upgrade : sh refresh.sh
+ - To use OB-Downloader utilities, type: tools
  
 Languages used for scripting: Python, Shell, Json
 

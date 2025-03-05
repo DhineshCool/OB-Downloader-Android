@@ -22,7 +22,7 @@ def fetch_version_and_engine(soup):
     """Fetch cloud version and engine numbers from the soup."""
     def fetch_version():
         vindex = soup.find("#Version")
-        ver = soup[vindex + len("#Version"):vindex + len("#Version") + 8]
+        ver = soup[vindex + len("#Version"):vindex + len("#Version") + 9]
         c_version = "#Version" + ver + "\n"
         if re.match(r"^\d+\.\d+\.\d+\.\d+$", ver.replace(" ", "")):
             return c_version
@@ -32,7 +32,7 @@ def fetch_version_and_engine(soup):
 
     def fetch_engine():
         eindex = soup.find("#Engine")
-        eng = soup[eindex + len("#Engine"):eindex + len("#Engine") + 4]
+        eng = soup[eindex + len("#Engine"):eindex + len("#Engine") + 5]
         c_engine = "#Engine" + eng + "\n"
         if re.match(r"^\d+\.\d+$", eng.replace(" ", "")):
             return c_engine
